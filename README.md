@@ -23,16 +23,41 @@ pip install -r requirements.txt
 
 ### 2. Launch the app
 
-```bash
-# Silent launch (no console window) — recommended
-launch.vbs
+There are several ways to start Whisper Local. All of them make the app appear as a **system tray icon** (near the clock).
 
-# Or via batch file (CMD window closes immediately)
+#### Option A: Double-click (recommended)
+
+Double-click **`launch.vbs`** in File Explorer. No console window appears — the app starts silently in the system tray.
+
+#### Option B: From PowerShell
+
+```powershell
+wscript .\launch.vbs
+```
+
+> ⚠️ **Note:** You must use `wscript` to run `.vbs` files. Running `.\launch.vbs` directly in PowerShell won't work.
+
+#### Option C: From CMD
+
+```cmd
+wscript launch.vbs
+```
+
+#### Option D: Using the batch file
+
+```cmd
 launch.bat
+```
 
-# Or directly with Python (console stays open for debugging)
+This uses `pythonw` so the CMD window closes immediately after launching.
+
+#### Option E: Debug mode (console stays open)
+
+```bash
 python -m whisper_local.app
 ```
+
+Use this if you want to see console output for debugging.
 
 ### 3. Use it
 
@@ -41,6 +66,15 @@ python -m whisper_local.app
 3. Speak into your microphone — text appears in the focused field
 4. Press **Ctrl+Win** again to stop, or wait 30s of silence for auto-stop
 5. After 10 minutes idle, the model auto-unloads to free RAM
+
+### 4. Run on Windows startup (optional)
+
+To have Whisper Local start automatically when you log in:
+
+1. Right-click the tray icon
+2. Check **"Run on Startup"**
+
+This adds a registry entry under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` that launches the app silently via `wscript.exe launch.vbs`. No admin rights needed. Uncheck the option to remove it.
 
 ## Hotkeys
 
