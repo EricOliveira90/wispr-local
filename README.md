@@ -25,39 +25,29 @@ pip install -r requirements.txt
 
 There are several ways to start Whisper Local. All of them make the app appear as a **system tray icon** (near the clock).
 
-#### Option A: Double-click (recommended)
+#### Option A: Double-click `launch.cmd` (recommended)
 
-Double-click **`launch.vbs`** in File Explorer. No console window appears — the app starts silently in the system tray.
+Double-click **`launch.cmd`** in File Explorer. A CMD window flashes briefly and closes — the app starts silently in the system tray.
 
-#### Option B: From PowerShell
+#### Option B: From PowerShell or CMD
 
 ```powershell
+# From PowerShell:
+.\launch.cmd
+
+# Or explicitly call wscript:
 wscript .\launch.vbs
 ```
 
-> ⚠️ **Note:** You must use `wscript` to run `.vbs` files. Running `.\launch.vbs` directly in PowerShell won't work.
-
-#### Option C: From CMD
-
-```cmd
-wscript launch.vbs
-```
-
-#### Option D: Using the batch file
-
-```cmd
-launch.bat
-```
-
-This uses `pythonw` so the CMD window closes immediately after launching.
-
-#### Option E: Debug mode (console stays open)
+#### Option C: Debug mode (console stays open)
 
 ```bash
 python -m whisper_local.app
 ```
 
 Use this if you want to see console output for debugging.
+
+> **Troubleshooting:** If double-clicking `launch.vbs` opens it in Notepad instead of running it, your `.vbs` file association may be misconfigured. Use `launch.cmd` instead, or run `wscript .\launch.vbs` from a terminal.
 
 ### 3. Use it
 
