@@ -1,6 +1,17 @@
-# Whisper Local — Faster-Whisper Test
+# Whisper Local — Privacy-First Speech-to-Text for Windows
 
-A simple test script for [faster-whisper](https://github.com/SYSTRAN/faster-whisper) speech-to-text on Windows. CPU-only, no cloud/API keys needed.
+A local, CPU-only speech-to-text application for Windows that types transcribed speech into any focused app. No cloud, no API keys — fully offline after initial model download.
+
+## Features
+
+- **Global hotkey dictation** — Ctrl+Win for English, Alt+Win for Portuguese
+- **System tray icon** with color-coded states (Gray=Idle, Yellow=Loading, Dark Blue=Ready, Bright Blue=Listening EN, Green=Listening PT)
+- **Three output modes** — Type to field (simulated keystrokes), Clipboard only, or Both
+- **Smart resource management** — Model loads on demand, auto-stops after 30s silence, auto-unloads after 10min idle
+- **Toast notifications** on model load/unload events
+- **Persistent settings** via `settings.json` — model size, output mode, run-on-startup
+- **Run on startup** — registry-based (HKCU), no admin needed
+- **Powered by [faster-whisper](https://github.com/SYSTRAN/faster-whisper)** with int8 CPU inference and VAD filtering
 
 ## Quick Start
 
@@ -10,68 +21,136 @@ A simple test script for [faster-whisper](https://github.com/SYSTRAN/faster-whis
 pip install -r requirements.txt
 ```
 
-### 2. Run the test
+### 2. Launch the app
 
 ```bash
-# Record 5 seconds of audio and transcribe (English, base model)
-python test_whisper.py
+# Using the launch script
+launch.bat
 
-# Record in Portuguese
-python test_whisper.py --lang pt
-
-# Use a different model size
-python test_whisper.py --model tiny      # Fastest, least accurate
-python test_whisper.py --model turbo     # Best speed/accuracy tradeoff
-
-# Record for longer
-python test_whisper.py --duration 10
-
-# Transcribe an existing audio file
-python test_whisper.py --file recording.wav
-
-# Auto-detect language
-python test_whisper.py --lang auto
-
-# Save the recording as a WAV file
-python test_whisper.py --save
-
-# List available microphone devices
-python test_whisper.py --list-devices
-
-# Use a specific microphone
-python test_whisper.py --device 1
+# Or directly with Python
+python -m whisper_local.app
 ```
+
+### 3. Use it
+
+1. The tray icon appears (Gray = idle, no model loaded)
+2. Press **Ctrl+Win** to start English dictation (model loads on first use)
+3. Speak into your microphone — text appears in the focused field
+4. Press **Ctrl+Win** again to stop, or wait 30s of silence for auto-stop
+5. After 10 minutes idle, the model auto-unloads to free RAM
+
+## Hotkeys
+
+| Hotkey | Action |
+|--------|--------|
+| **Ctrl+Win** | Toggle English dictation |
+| **Alt+Win** | Toggle Portuguese dictation |
+| **Ctrl+Shift+Q** | Quit the application |
+
+Pressing one language hotkey while the other is active switches language seamlessly.
+
+## Tray Menu
+
+Right-click the tray icon for:
+
+- **Load Model** / **Unload Model** — manual model lifecycle control
+- **Output Mode** — Type to field / Clipboard only / Both
+- **Model Size** — Tiny / Base / Small / Turbo (only changeable when model is unloaded)
+- **Run on Startup** — toggle Windows auto-start
+- **Quit** — exit the application
+
+## Tray Icon States
+
+| Color | State |
+|-------|-------|
+| Gray | Idle (no model loaded) |
+| Yellow | Loading model... |
+| Dark Blue | Ready (model loaded, not listening) |
+| Bright Blue | Listening (English) |
+| Green | Listening (Portuguese) |
 
 ## Model Sizes
 
-| Model   | Size   | Speed  | Accuracy | First Download |
-|---------|--------|--------|----------|----------------|
-| `tiny`  | ~75 MB | ⚡⚡⚡⚡ | ★☆☆☆     | ~30s           |
-| `base`  | ~150 MB| ⚡⚡⚡  | ★★☆☆     | ~1min          |
-| `small` | ~500 MB| ⚡⚡   | ★★★☆     | ~2min          |
-| `medium`| ~1.5 GB| ⚡     | ★★★★     | ~5min          |
-| `turbo` | ~1.5 GB| ⚡⚡⚡  | ★★★★     | ~5min          |
-| `large-v3`| ~3 GB| ⚡    | ★★★★★    | ~10min         |
+| Model | Size | Speed | Accuracy | First Download |
+|-------|------|-------|----------|----------------|
+| `tiny` | ~75 MB | ⚡⚡⚡⚡ | ★☆☆☆ | ~30s |
+| `base` | ~150 MB | ⚡⚡⚡ | ★★☆☆ | ~1min |
+| `small` | ~500 MB | ⚡⚡ | ★★★☆ | ~2min |
+| `turbo` | ~1.5 GB | ⚡⚡⚡ | ★★★★ | ~5min |
 
-> **Note:** Models are downloaded automatically on first use and cached locally (~`%USERPROFILE%\.cache\huggingface`).
+> **Default: Turbo** — best speed/accuracy tradeoff. Models are downloaded automatically on first use and cached locally (~`%USERPROFILE%\.cache\huggingface`).
 
-## Options
+## Settings
 
-| Flag | Short | Description | Default |
-|------|-------|-------------|---------|
-| `--model` | `-m` | Model size (tiny/base/small/medium/turbo/large-v3) | `base` |
-| `--lang` | `-l` | Language code (en, pt, es, fr...) or `auto` | `en` |
-| `--duration` | `-d` | Recording duration in seconds | `5` |
-| `--file` | `-f` | Audio file path (skips mic recording) | — |
-| `--beam-size` | `-b` | Beam size for decoding | `5` |
-| `--device` | | Audio input device index | default mic |
-| `--list-devices` | | List audio input devices | — |
-| `--save` | `-s` | Save recording as WAV | — |
+Settings are persisted in `settings.json` (created automatically on first run):
+
+```json
+{
+  "model_size": "turbo",
+  "output_mode": "type",
+  "run_on_startup": false
+}
+```
+
+| Setting | Values | Default | Notes |
+|---------|--------|---------|-------|
+| `model_size` | tiny, base, small, turbo | turbo | Only changeable when model is unloaded |
+| `output_mode` | type, clipboard, both | type | Takes effect immediately |
+| `run_on_startup` | true, false | false | Uses HKCU registry, no admin needed |
+
+## Architecture
+
+```
+whisper_local/
+├── app.py        — Main orchestrator (wires all subsystems)
+├── engine.py     — Transcription engine (faster-whisper wrapper)
+├── audio.py      — Microphone capture (sounddevice)
+├── tray.py       — System tray icon (pystray + Pillow)
+├── hotkeys.py    — Global hotkey registration (keyboard)
+├── output.py     — Text delivery (pyautogui + pyperclip)
+└── settings.py   — Settings persistence (JSON + registry)
+```
+
+## Testing
+
+The project includes 30 integration-style tests covering all major behaviors:
+
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run specific test file
+python -m pytest tests/test_app.py -v
+python -m pytest tests/test_engine.py -v
+python -m pytest tests/test_output.py -v
+python -m pytest tests/test_settings.py -v
+python -m pytest tests/test_timers.py -v
+```
+
+## Legacy Test Script
+
+The original `test_whisper.py` script is still available for quick microphone testing:
+
+```bash
+python test_whisper.py                    # Record 5s, English, base model
+python test_whisper.py --lang pt          # Portuguese
+python test_whisper.py --model turbo      # Turbo model
+python test_whisper.py --file audio.wav   # Transcribe a file
+python test_whisper.py --list-devices     # List audio devices
+```
 
 ## Requirements
 
 - Windows 10/11
 - Python 3.9+
-- Microphone (for live recording)
-- ~150 MB–3 GB disk space (depending on model, downloaded on first run)
+- Microphone
+- ~150 MB–1.5 GB disk space (depending on model, downloaded on first run)
 - No internet needed after initial model download
+- No admin rights required
+
+## Typical Flow
+
+1. Launch via `launch.bat` or auto-start → tray icon appears (Gray)
+2. Focus a text field → press Ctrl+Win → speak → text appears
+3. Press Ctrl+Win again or wait 30s silence → dictation stops
+4. After 10min idle → model auto-unloads; next hotkey press reloads it
