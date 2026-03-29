@@ -130,18 +130,6 @@ python -m pytest tests/test_settings.py -v
 python -m pytest tests/test_timers.py -v
 ```
 
-## Legacy Test Script
-
-The original `test_whisper.py` script is still available for quick microphone testing:
-
-```bash
-python test_whisper.py                    # Record 5s, English, base model
-python test_whisper.py --lang pt          # Portuguese
-python test_whisper.py --model turbo      # Turbo model
-python test_whisper.py --file audio.wav   # Transcribe a file
-python test_whisper.py --list-devices     # List audio devices
-```
-
 ## Requirements
 
 - Windows 10/11
