@@ -1,6 +1,7 @@
 @echo off
 REM Whisper Local — Launch Script
-REM Starts the Whisper Local system tray application
+REM Starts the app without a visible console window.
+REM For a fully silent launch (no CMD flash), use launch.vbs instead.
 
 cd /d "%~dp0"
-python -m whisper_local.app
+start "" /B pythonw -m whisper_local.app

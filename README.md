@@ -24,10 +24,13 @@ pip install -r requirements.txt
 ### 2. Launch the app
 
 ```bash
-# Using the launch script
+# Silent launch (no console window) — recommended
+launch.vbs
+
+# Or via batch file (CMD window closes immediately)
 launch.bat
 
-# Or directly with Python
+# Or directly with Python (console stays open for debugging)
 python -m whisper_local.app
 ```
 

@@ -87,10 +87,14 @@ def set_startup_registry(enable: bool) -> None:
             winreg.HKEY_CURRENT_USER, _REGISTRY_KEY, 0, winreg.KEY_SET_VALUE
         )
         if enable:
-            # Point to launch.bat in the app directory
+            # Point to launch.vbs for silent startup (no console window)
             app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            launch_bat = os.path.join(app_dir, "launch.bat")
-            winreg.SetValueEx(key, _REGISTRY_NAME, 0, winreg.REG_SZ, launch_bat)
+            launch_vbs = os.path.join(app_dir, "launch.vbs")
+            # Use wscript to run VBS silently
+            winreg.SetValueEx(
+                key, _REGISTRY_NAME, 0, winreg.REG_SZ,
+                f'wscript.exe "{launch_vbs}"'
+            )
         else:
             try:
                 winreg.DeleteValue(key, _REGISTRY_NAME)
