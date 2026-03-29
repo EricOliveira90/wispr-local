@@ -30,7 +30,7 @@ class WhisperLocalApp:
     """Orchestrates the Whisper Local application."""
 
     # Default timeouts (seconds)
-    SILENCE_TIMEOUT = 30    # Auto-stop after 30s silence
+    SILENCE_TIMEOUT = 3     # Auto-stop after 3s silence
     IDLE_TIMEOUT = 600      # Auto-unload after 10min idle
 
     def __init__(self, settings: Settings | None = None):
@@ -154,7 +154,11 @@ class WhisperLocalApp:
         text = self.engine.transcribe(audio, language=self._current_language)
         if text:
             print(f"📝 {text}")
-            deliver_text(text, mode=self._output_mode)
+            self.hotkeys.pause()
+            try:
+                deliver_text(text, mode=self._output_mode)
+            finally:
+                self.hotkeys.resume()
         self._current_language = None
         return text
 

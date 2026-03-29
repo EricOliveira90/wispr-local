@@ -220,6 +220,88 @@ def test_app_delivers_text_via_output_mode():
     mock_deliver.assert_called_once_with("Output test", mode="clipboard")
 
 
+def test_app_pauses_and_resumes_hotkeys_around_text_delivery():
+    """Hotkeys are paused before deliver_text and resumed after to avoid hook corruption."""
+    from whisper_local.app import WhisperLocalApp
+
+    mock_icon = MagicMock()
+    mock_whisper_model = MagicMock()
+
+    mock_seg = MagicMock()
+    mock_seg.text = " Pause test"
+    mock_seg.start = 0.0
+    mock_seg.end = 1.0
+    mock_info = MagicMock()
+    mock_info.language = "en"
+    mock_info.language_probability = 0.99
+    mock_whisper_model.transcribe.return_value = (iter([mock_seg]), mock_info)
+
+    fake_audio = np.zeros(16000, dtype=np.float32)
+    mock_recorder = MagicMock()
+    mock_recorder.is_recording = False
+    mock_recorder.stop.return_value = fake_audio
+
+    call_order = []
+
+    with patch("whisper_local.engine.WhisperModel", return_value=mock_whisper_model):
+        with patch("whisper_local.app.AudioRecorder", return_value=mock_recorder):
+            with patch("whisper_local.app.deliver_text") as mock_deliver:
+                app = WhisperLocalApp()
+                app._icon = mock_icon
+                app.on_load_model()
+
+                # Track call order of pause, deliver_text, resume
+                app.hotkeys.pause = MagicMock(side_effect=lambda: call_order.append("pause"))
+                app.hotkeys.resume = MagicMock(side_effect=lambda: call_order.append("resume"))
+                mock_deliver.side_effect = lambda *a, **kw: call_order.append("deliver")
+
+                app.on_start_dictation("en")
+                app.on_stop_dictation()
+
+    assert call_order == ["pause", "deliver", "resume"]
+
+
+def test_app_resumes_hotkeys_even_if_deliver_text_raises():
+    """Hotkeys are resumed even if deliver_text raises an exception."""
+    from whisper_local.app import WhisperLocalApp
+
+    mock_icon = MagicMock()
+    mock_whisper_model = MagicMock()
+
+    mock_seg = MagicMock()
+    mock_seg.text = " Error test"
+    mock_seg.start = 0.0
+    mock_seg.end = 1.0
+    mock_info = MagicMock()
+    mock_info.language = "en"
+    mock_info.language_probability = 0.99
+    mock_whisper_model.transcribe.return_value = (iter([mock_seg]), mock_info)
+
+    fake_audio = np.zeros(16000, dtype=np.float32)
+    mock_recorder = MagicMock()
+    mock_recorder.is_recording = False
+    mock_recorder.stop.return_value = fake_audio
+
+    with patch("whisper_local.engine.WhisperModel", return_value=mock_whisper_model):
+        with patch("whisper_local.app.AudioRecorder", return_value=mock_recorder):
+            with patch("whisper_local.app.deliver_text", side_effect=RuntimeError("boom")):
+                app = WhisperLocalApp()
+                app._icon = mock_icon
+                app.on_load_model()
+
+                app.hotkeys.pause = MagicMock()
+                app.hotkeys.resume = MagicMock()
+
+                app.on_start_dictation("en")
+                try:
+                    app.on_stop_dictation()
+                except RuntimeError:
+                    pass
+
+    app.hotkeys.pause.assert_called_once()
+    app.hotkeys.resume.assert_called_once()
+
+
 def test_app_output_mode_defaults_to_type():
     """App defaults to 'type' output mode."""
     from whisper_local.app import WhisperLocalApp
