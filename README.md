@@ -8,7 +8,6 @@ A local, CPU-only speech-to-text application for Windows that types transcribed 
 - **System tray icon** with color-coded states (Gray=Idle, Yellow=Loading, Dark Blue=Ready, Bright Blue=Listening EN, Green=Listening PT)
 - **Three output modes** — Type to field (simulated keystrokes), Clipboard only, or Both
 - **Smart resource management** — Model loads on demand, auto-stops after 30s silence, auto-unloads after 10min idle
-- **Toast notifications** on model load/unload events
 - **Persistent settings** via `settings.json` — model size, output mode, run-on-startup
 - **Run on startup** — registry-based (HKCU), no admin needed
 - **Powered by [faster-whisper](https://github.com/SYSTRAN/faster-whisper)** with int8 CPU inference and VAD filtering

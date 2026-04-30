@@ -3,27 +3,12 @@
 import threading
 
 import pystray
-from plyer import notification as plyer_notification
-
 from whisper_local.audio import AudioRecorder
 from whisper_local.engine import TranscriptionEngine
 from whisper_local.hotkeys import HotkeyManager
 from whisper_local.output import deliver_text
 from whisper_local.settings import Settings, set_startup_registry
 from whisper_local.tray import create_tray_icon, update_tray_state
-
-
-def notify(title: str, message: str) -> None:
-    """Show a Windows toast notification."""
-    try:
-        plyer_notification.notify(
-            title=title,
-            message=message,
-            app_name="Whisper Local",
-            timeout=5,
-        )
-    except Exception:
-        pass  # Don't crash if notifications fail
 
 
 class WhisperLocalApp:
@@ -66,7 +51,6 @@ class WhisperLocalApp:
         """Called when idle timer fires — auto-unload model."""
         if self.engine.state == "ready":
             self.on_unload_model()
-            notify(title="Whisper Local", message="Model auto-unloaded after idle timeout")
 
     def on_load_model(self) -> None:
         """Handle 'Load Model' menu action."""
@@ -75,7 +59,6 @@ class WhisperLocalApp:
         self._update_icon("loading")
         self.engine.load_model(self.settings.model_size)
         self._update_icon("ready")
-        notify(title="Whisper Local", message="Model loaded and ready")
 
     def on_unload_model(self) -> None:
         """Handle 'Unload Model' menu action."""
@@ -84,7 +67,6 @@ class WhisperLocalApp:
         self._cancel_idle_timer()
         self.engine.unload_model()
         self._update_icon("idle")
-        notify(title="Whisper Local", message="Model unloaded — RAM freed")
 
     def on_hotkey_en(self) -> str | None:
         """Handle Ctrl+Win hotkey — toggle English dictation."""

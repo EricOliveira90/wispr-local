@@ -60,39 +60,3 @@ def test_app_idle_timer_cancelled_on_new_dictation():
     assert app.engine.state == "ready"
 
 
-def test_app_notify_on_model_load():
-    """Toast notification fires when model finishes loading."""
-    from whisper_local.app import WhisperLocalApp
-
-    mock_icon = MagicMock()
-    mock_model = MagicMock()
-
-    with patch("whisper_local.engine.WhisperModel", return_value=mock_model):
-        with patch("whisper_local.app.notify") as mock_notify:
-            app = WhisperLocalApp()
-            app._icon = mock_icon
-            app.on_load_model()
-
-    mock_notify.assert_called_once()
-    call_args = mock_notify.call_args
-    assert "loaded" in call_args[1].get("message", "").lower() or "loaded" in str(call_args).lower()
-
-
-def test_app_notify_on_model_unload():
-    """Toast notification fires when model is unloaded."""
-    from whisper_local.app import WhisperLocalApp
-
-    mock_icon = MagicMock()
-    mock_model = MagicMock()
-
-    with patch("whisper_local.engine.WhisperModel", return_value=mock_model):
-        with patch("whisper_local.app.notify") as mock_notify:
-            app = WhisperLocalApp()
-            app._icon = mock_icon
-            app.on_load_model()
-            mock_notify.reset_mock()
-            app.on_unload_model()
-
-    mock_notify.assert_called_once()
-    call_args = mock_notify.call_args
-    assert "unloaded" in call_args[1].get("message", "").lower() or "unloaded" in str(call_args).lower()

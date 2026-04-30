@@ -12,7 +12,6 @@ Durable decisions that apply across all phases:
 - **System tray**: `pystray` with `Pillow` for icon rendering
 - **Global hotkeys**: `keyboard` library (or `pynput`) for system-wide hotkey registration
 - **Text output**: `pyautogui` / `pyperclip` for simulated keystrokes and clipboard
-- **Notifications**: Windows toast notifications via `win10toast` or `plyer`
 - **Settings file**: `settings.json` in the app directory, loaded at startup
 - **Model cache**: Default HuggingFace cache (`%USERPROFILE%\.cache\huggingface`)
 - **Tray icon states**:
@@ -78,11 +77,11 @@ After transcription, text is delivered to the focused application via the config
 
 ## Phase 3: Resource Management (Auto-stop, Auto-unload, Manual Controls)
 
-**User stories**: 30s silence auto-stop, 10min idle auto-unload, manual load/unload via tray, toast notifications on model load/unload
+**User stories**: 30s silence auto-stop, 10min idle auto-unload, manual load/unload via tray
 
 ### What to build
 
-Add intelligent resource management to the dictation lifecycle. During active listening, if 30 seconds of silence are detected (no speech segments from VAD), dictation automatically stops and the icon returns to Dark Blue (ready). After dictation stops, a 10-minute idle timer begins; if no new dictation is started within that window, the model is unloaded from memory and the icon returns to Gray (idle). The tray menu gains explicit "Load Model" and "Unload Model" options for manual control. Windows toast notifications fire when the model finishes loading and when it is unloaded (both automatic and manual).
+Add intelligent resource management to the dictation lifecycle. During active listening, if 30 seconds of silence are detected (no speech segments from VAD), dictation automatically stops and the icon returns to Dark Blue (ready). After dictation stops, a 10-minute idle timer begins; if no new dictation is started within that window, the model is unloaded from memory and the icon returns to Gray (idle). The tray menu gains explicit "Load Model" and "Unload Model" options for manual control. The tray icon color changes provide visual feedback for all state transitions.
 
 ### Acceptance criteria
 
@@ -91,8 +90,6 @@ Add intelligent resource management to the dictation lifecycle. During active li
 - [ ] 10 minutes of idle after stop triggers automatic model unload; icon returns to Gray
 - [ ] Tray menu includes "Load Model" and "Unload Model" options with correct enabled/disabled states
 - [ ] Manual unload frees model from RAM; icon returns to Gray
-- [ ] Toast notification appears when model finishes loading
-- [ ] Toast notification appears when model is unloaded (auto or manual)
 - [ ] Next hotkey press after unload triggers fresh model load (Yellow → Dark Blue → listening)
 
 ---

@@ -25,7 +25,6 @@ Microphone icon in tray. Color = state:
 - Auto-stop: 30s silence → stop listening (model stays loaded)
 - Auto-unload: 10min idle after stop → unload model, free RAM
 - Manual load/unload via tray menu
-- Toast notifications on model load/unload events
 
 ## Settings
 
